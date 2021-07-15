@@ -1,0 +1,71 @@
+version: "3.4"
+
+services:
+  eureka:
+    container_name: eureka-container
+    image: lexmatos/eureka:0.0.1-SNAPSHOT 
+    ports:
+      - "8761:8761"
+    networks:
+      - diarysnet
+    environment:
+      TZ: America/Sao_Paulo
+
+  gateway:
+    container_name: gateway-container
+    image: lexmatos/gateway:0.0.1-SNAPSHOT
+    ports:
+      - "8765:8765"
+    depends_on:
+      - eureka
+    networks:
+      - diarysnet
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka:8761/eureka
+      TZ: America/Sao_Paulo
+
+  user:
+    image: lexmatos/user-service
+    restart: always
+    build:
+      context: .
+      dockerfile: user/Dockerfile
+    environment:
+      TZ: America/Sao_Paulo
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka:8761/eureka
+      SPRING.DATASOURCE.URL: jdbc:h2:mem:diary
+      SPRING.DATASOURCE.USERNAME: sa
+      SPRING.DATASOURCE.PASSWORD: 
+      SPRING.FLYWAY.URL: jdbc:h2:mem:diary;DB_CLOSE_DELAY=-1
+      SPRING.FLYWAY.USER: sa
+      SPRING.FLYWAY.PASSWORD:
+    depends_on:
+      - eureka
+    networks:
+      - diarysnet
+
+  diary:
+    image: lexmatos/diary-service
+    restart: always
+    build:
+      context: .
+      dockerfile: diary/Dockerfile
+    environment:
+      TZ: America/Sao_Paulo
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://eureka:8761/eureka
+      SPRING.DATASOURCE.URL: jdbc:h2:mem:diary
+      SPRING.DATASOURCE.USERNAME: sa
+      SPRING.DATASOURCE.PASSWORD: 
+      SPRING.FLYWAY.URL: jdbc:h2:mem:diary;DB_CLOSE_DELAY=-1
+      SPRING.FLYWAY.USER: sa
+      SPRING.FLYWAY.PASSWORD:
+    depends_on:
+      - eureka
+    networks:
+      - diarysnet
+
+networks:
+  diarysnet:
+    driver: bridge
+     
+
