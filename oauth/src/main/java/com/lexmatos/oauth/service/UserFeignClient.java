@@ -16,5 +16,5 @@ import com.lexmatos.oauth.entities.User;
 public interface UserFeignClient {
 
     @GetMapping(value = "/search")
-    ResponseEntity <List<User>> findBy(@RequestParam("email") String email);
+    ResponseEntity <List<User>> findByEmail(@RequestParam("email") String email);
 }
